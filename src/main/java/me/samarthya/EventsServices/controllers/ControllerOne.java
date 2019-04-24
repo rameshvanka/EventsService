@@ -2,19 +2,25 @@ package me.samarthya.EventsServices.controllers;
 
 import me.samarthya.EventsServices.ldap.model.UserModel;
 import me.samarthya.EventsServices.ldap.repository.ApacheDSRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class ControllerOne {
 
+    private final static Logger logger = LoggerFactory.getLogger(ControllerOne.class);
+
     @Autowired
     ApacheDSRepository apacheDSRepository;
+
+    @Autowired
+    ApplicationContext context;
 
     @GetMapping("/")
     @ResponseBody
@@ -26,8 +32,9 @@ public class ControllerOne {
     }
 
     @ResponseBody
-    @GetMapping("/error")
-    public String errorMessage(HttpServletRequest request) {
+    @GetMapping("/error2")
+    public String errorMessage(HttpServletRequest request, HttpServletResponse response) {
+
         return "Error occurred, please see the server logs.";
     }
 
@@ -36,5 +43,12 @@ public class ControllerOne {
     @GetMapping("/users")
     public Iterable<UserModel> getAllUsers() {
         return apacheDSRepository.findAll();
+    }
+
+    @ResponseBody
+    @PostMapping("/protected")
+    public String protectedMethod(HttpServletRequest request) {
+        logger.debug(" Requested: " + request.getRequestURI() + " : " + request.getUserPrincipal().getName() + " : " + context.getApplicationName());
+        return "Method Protected";
     }
 }
